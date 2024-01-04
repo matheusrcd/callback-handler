@@ -1,23 +1,45 @@
 package br.com.bradesco.bpw.callbackhandler.controller;
 
+import br.com.bradesco.bpw.callbackhandler.dto.CallbackResponse;
+import br.com.bradesco.bpw.callbackhandler.dto.PayloadTransaction;
 import br.com.bradesco.bpw.callbackhandler.service.CallbackHandlerService;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.jsonwebtoken.Jwts;
+import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.io.IOException;
 
 @RestController
-@RequestMapping(value = "/")
+@RequestMapping(value = "/v2")
+@Slf4j
 public class CallbackHandlerController {
+
+    private String secretKey;
+
+    Logger logger = LoggerFactory.getLogger(CallbackHandlerController.class);
 
     @Autowired
     private CallbackHandlerService callbackHandlerService;
 
-    @GetMapping(value = "/")
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @PostMapping(value = "/tx_sign_request", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public String retornarCallback() {
-        return "Hello world!";
+    public ResponseEntity<String> retornarCallback(@RequestBody String encryptedBody) {
+        try {
+            PayloadTransaction payloadTransaction = callbackHandlerService.processRequest(encryptedBody);
+            return ResponseEntity.ok(callbackHandlerService.processTransaction(payloadTransaction));
+        } catch (Exception e) {
+            logger.error(e.toString());
+            return ResponseEntity.badRequest().body("");
+        }
     }
 }
