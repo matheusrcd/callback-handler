@@ -1,0 +1,6 @@
+br/com/bradesco/bpw/callbackhandler/config/ServerConfig$1.class
+br/com/bradesco/bpw/callbackhandler/controller/CallbackHandlerController.class
+br/com/bradesco/bpw/callbackhandler/CallbackHandlerApplication.class
+br/com/bradesco/bpw/callbackhandler/config/ServerConfig.class
+br/com/bradesco/bpw/callbackhandler/service/CallbackHandlerService.class
+br/com/bradesco/bpw/callbackhandler/config/SecurityConfig.class
