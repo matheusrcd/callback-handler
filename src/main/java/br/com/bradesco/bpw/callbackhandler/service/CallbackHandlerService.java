@@ -12,17 +12,26 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.util.Base64;
 import java.util.Date;
 
 @Service
 public class CallbackHandlerService {
     Logger logger = LoggerFactory.getLogger(CallbackHandlerService.class);
 
-    private String secretKey;
+    private String secretKeyString = "abc";
+    KeyPair keyPair;
+    PrivateKey privateKey;
+    PublicKey publicKey;
     @Autowired
     private ObjectMapper objectMapper;
     public String processTransaction(PayloadTransaction payloadTransaction) throws JsonProcessingException {
-
         String callbackResponse;
         if (validateTransaction(payloadTransaction)) {
             callbackResponse = generateSignedResponse("APPROVE", payloadTransaction.getRequestId(), "");
@@ -36,9 +45,13 @@ public class CallbackHandlerService {
     private boolean validateTransaction(PayloadTransaction payload) {
         return true;
     }
-    public PayloadTransaction processRequest(String encryptedBody) throws JsonProcessingException {
+    public PayloadTransaction processRequest(String encryptedBody) throws Exception {
+        keyPair = generateKeyPair();
+        privateKey = keyPair.getPrivate();
+        publicKey = keyPair.getPublic();
+
         String decryptedBody = Jwts.parserBuilder()
-                .setSigningKey(secretKey)
+                .setSigningKey(publicKey)
                 .build()
                 .parseClaimsJws(encryptedBody)
                 .getBody()
@@ -58,8 +71,14 @@ public class CallbackHandlerService {
 
         String jwtResponse = Jwts.builder()
                 .setSubject(jsonResponse)
-                .signWith(SignatureAlgorithm.HS256, secretKey)
+                .signWith(SignatureAlgorithm.HS256, privateKey)
                 .compact();
         return jwtResponse;
+    }
+
+    private static KeyPair generateKeyPair() throws Exception {
+        KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("HS256");
+        keyPairGenerator.initialize(2048); // Tamanho da chave
+        return keyPairGenerator.generateKeyPair();
     }
 }

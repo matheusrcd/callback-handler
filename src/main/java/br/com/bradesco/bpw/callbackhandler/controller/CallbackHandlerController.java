@@ -21,8 +21,6 @@ import java.io.IOException;
 @Slf4j
 public class CallbackHandlerController {
 
-    private String secretKey;
-
     Logger logger = LoggerFactory.getLogger(CallbackHandlerController.class);
 
     @Autowired
@@ -31,7 +29,7 @@ public class CallbackHandlerController {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @PostMapping(value = "/tx_sign_request", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/tx_sign_request", consumes = MediaType.TEXT_PLAIN_VALUE)
     @ResponseBody
     public ResponseEntity<String> retornarCallback(@RequestBody String encryptedBody) {
         try {
@@ -41,5 +39,11 @@ public class CallbackHandlerController {
             logger.error(e.toString());
             return ResponseEntity.badRequest().body("");
         }
+    }
+
+    @GetMapping(value = "/getTx")
+    @ResponseBody
+    public ResponseEntity<String> getTx() {
+        return ResponseEntity.ok("Sucesso");
     }
 }

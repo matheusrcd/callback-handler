@@ -1,6 +1,11 @@
-br/com/bradesco/bpw/callbackhandler/config/ServerConfig$1.class
-br/com/bradesco/bpw/callbackhandler/controller/CallbackHandlerController.class
 br/com/bradesco/bpw/callbackhandler/CallbackHandlerApplication.class
-br/com/bradesco/bpw/callbackhandler/config/ServerConfig.class
 br/com/bradesco/bpw/callbackhandler/service/CallbackHandlerService.class
+br/com/bradesco/bpw/callbackhandler/dto/CallbackResponse.class
+br/com/bradesco/bpw/callbackhandler/config/ServerConfig$1.class
+br/com/bradesco/bpw/callbackhandler/dto/RawTx.class
+br/com/bradesco/bpw/callbackhandler/controller/CallbackHandlerController.class
+br/com/bradesco/bpw/callbackhandler/config/ServerConfig.class
 br/com/bradesco/bpw/callbackhandler/config/SecurityConfig.class
+br/com/bradesco/bpw/callbackhandler/dto/PayloadTransaction.class
+br/com/bradesco/bpw/callbackhandler/dto/Destination.class
+br/com/bradesco/bpw/callbackhandler/dto/ActionInfo.class
