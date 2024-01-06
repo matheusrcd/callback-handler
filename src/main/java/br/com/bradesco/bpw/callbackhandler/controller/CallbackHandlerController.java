@@ -28,15 +28,31 @@ public class CallbackHandlerController {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @PostMapping(value = "/tx_sign_request", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/tx_sign_request", consumes = MediaType.TEXT_PLAIN_VALUE)
     @ResponseBody
-    public ResponseEntity<String> retornarCallback(@RequestBody String encryptedBody) {
-        try {
-            PayloadTransaction payloadTransaction = callbackHandlerService.processRequest(encryptedBody);
-            return ResponseEntity.ok(callbackHandlerService.processTransaction(payloadTransaction));
-        } catch (Exception e) {
-            logger.error(e.toString());
-            return ResponseEntity.badRequest().body("");
+    public ResponseEntity<String> transactionSigning(@RequestBody String encryptedBody) {
+        PayloadTransaction payloadTransaction = callbackHandlerService.processTxRequest(encryptedBody);
+        String callbackResponse = callbackHandlerService.processTransaction(payloadTransaction);
+        if (!callbackResponse.equals("")) {
+            return ResponseEntity.ok(callbackResponse);
         }
+        return ResponseEntity.badRequest().body("");
+    }
+
+    @PostMapping(value = "/config_change_sign_request", consumes = MediaType.TEXT_PLAIN_VALUE)
+    @ResponseBody
+    public ResponseEntity<String> configurationApprovalCallback(@RequestBody String encryptedBody) {
+        PayloadTransaction payloadTransaction = callbackHandlerService.processTxRequest(encryptedBody);
+        String callbackResponse = callbackHandlerService.processTransaction(payloadTransaction);
+        if (!callbackResponse.equals("")) {
+            return ResponseEntity.ok(callbackResponse);
+        }
+        return ResponseEntity.badRequest().body("");
+    }
+
+    @GetMapping(value = "/getTx")
+    @ResponseBody
+    public ResponseEntity<String> getTx() {
+        return ResponseEntity.ok("Sucesso");
     }
 }

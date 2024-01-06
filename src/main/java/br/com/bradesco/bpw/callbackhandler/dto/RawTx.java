@@ -8,7 +8,7 @@ import java.util.List;
 @Getter
 @Setter
 public class RawTx {
-    private List<Integer> keyDerivationPath;
+    private String keyDerivationPath;
     private String rawTx;
     private String payload;
 
