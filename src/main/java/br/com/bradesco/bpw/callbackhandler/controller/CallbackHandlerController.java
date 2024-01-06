@@ -20,9 +20,6 @@ import java.io.IOException;
 @RequestMapping(value = "/v2")
 @Slf4j
 public class CallbackHandlerController {
-
-    private String secretKey;
-
     Logger logger = LoggerFactory.getLogger(CallbackHandlerController.class);
 
     @Autowired

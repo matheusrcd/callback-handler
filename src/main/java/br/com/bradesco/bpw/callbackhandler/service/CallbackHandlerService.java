@@ -18,7 +18,7 @@ import java.util.Date;
 public class CallbackHandlerService {
     Logger logger = LoggerFactory.getLogger(CallbackHandlerService.class);
 
-    private String secretKey;
+    private String secretKey = "";
     @Autowired
     private ObjectMapper objectMapper;
     public String processTransaction(PayloadTransaction payloadTransaction) throws JsonProcessingException {
@@ -37,6 +37,7 @@ public class CallbackHandlerService {
         return true;
     }
     public PayloadTransaction processRequest(String encryptedBody) throws JsonProcessingException {
+        logger.info("RECEBIDO DA FIREBLOCKS: " + encryptedBody);
         String decryptedBody = Jwts.parserBuilder()
                 .setSigningKey(secretKey)
                 .build()
@@ -44,7 +45,7 @@ public class CallbackHandlerService {
                 .getBody()
                 .toString();
         PayloadTransaction payloadTransaction = objectMapper.readValue(decryptedBody, PayloadTransaction.class);
-        logger.info("ENVIO FEITO PELA FIREBLOCKS: " + payloadTransaction);
+        logger.info("ENVIO FIREBLOCKS PROCESSADO: " + payloadTransaction);
         return payloadTransaction;
     }
 
