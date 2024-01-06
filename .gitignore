@@ -1,5 +1,13 @@
-/target/
-.classpath
-.project
+*.classpath
+*.class
+*.prefs
+*.jar
+*.lst
+*.project
+*.factorypath
+*.original
+target/
 .settings/
-/.idea/
+.apt_generated
+.sts4-cache
+.springBeans
