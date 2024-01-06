@@ -12,3 +12,4 @@ target/
 .sts4-cache
 .springBeans
 **/.DS_Store
+.idea/
