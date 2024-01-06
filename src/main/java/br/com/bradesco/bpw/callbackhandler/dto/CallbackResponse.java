@@ -6,6 +6,7 @@ import lombok.*;
 @Setter
 @AllArgsConstructor
 @RequiredArgsConstructor
+@ToString
 public class CallbackResponse {
     @NonNull
     private String action;
