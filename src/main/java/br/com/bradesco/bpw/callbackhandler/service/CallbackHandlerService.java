@@ -35,6 +35,7 @@ public class CallbackHandlerService {
     private String cosignerPublicKeyPath;
     private SecretKeySpec privateKey;
     private SecretKeySpec cosignerPubKey;
+
     @Autowired
     private ObjectMapper objectMapper;
 
