@@ -1,8 +1,6 @@
 server:
   ssl:
-    key-store: springboot.p12
-    key-store-password: password
-    key-store-type: pkcs12
-    key-alias: springboot
-    key-password: password
+    key-store: callbackhandlerCert.jks
+    key-store-password: Bl0ckchain2024
+    key-alias: callbackhandlerCert
   port: 443
