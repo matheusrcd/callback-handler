@@ -40,14 +40,16 @@ public class CallbackHandlerService {
     private ObjectMapper objectMapper;
 
     public PayloadTransaction processTxRequest(String encryptedBody) {
-        if (!validateJwt(encryptedBody)){ return null; }
+        if (!validateJwt(encryptedBody)) {
+            return null;
+        }
         String txDecrypted = parseTxJwt(encryptedBody);
 
-        try{
+        try {
             PayloadTransaction payloadTransaction = objectMapper.readValue(txDecrypted, PayloadTransaction.class);
             logger.info("Transação recebida e validada com sucesso: " + payloadTransaction.getRequestId());
             return payloadTransaction;
-        }catch (JsonProcessingException e){
+        } catch (JsonProcessingException e) {
             logger.error("ERRO AO VALIDAR TRANSACAO: " + e.getStackTrace());
         }
         return null;
@@ -59,62 +61,61 @@ public class CallbackHandlerService {
             return generateSignedResponse("APPROVE", payloadTransaction.getRequestId(), "");
         } else {
             logger.info("Rejeitando transação");
-            if (payloadTransaction == null){return "";}
+            if (payloadTransaction == null) {
+                return "";
+            }
             return generateSignedResponse("REJECT", payloadTransaction.getRequestId(), "Failed to validate ETH transaction");
         }
     }
 
     private boolean validateTransaction(PayloadTransaction payload) {
-        if (payload == null){return false;}
+        if (payload == null) {
+            return false;
+        }
         return true;
     }
 
     private String generateSignedResponse(String action, String requestId, String rejectionReason) {
-        CallbackResponse callbackResponse = new CallbackResponse(action,requestId, rejectionReason);
-
-        if (rejectionReason.equals("")){
-            callbackResponse = new CallbackResponse(action,requestId);
+        CallbackResponse callbackResponse = new CallbackResponse(action, requestId, rejectionReason);
+        if (rejectionReason.equals("")) {
+            callbackResponse = new CallbackResponse(action, requestId);
         }
-
-        try{
-            logger.info("Gerando resposta: " + callbackResponse);
-            String callbackResponseJson = objectMapper.writeValueAsString(callbackResponse);
-            String jwtResponse = Jwts.builder()
-                    .setSubject(callbackResponseJson)
-                    .signWith(privateKey)
-                    .compact();
-            return jwtResponse;
-        }catch (JsonProcessingException e){
-            logger.error("ERRO AO CRIAR RESPOSTA: " + e.getStackTrace());
-        }
-        return "";
+        logger.info("Gerando resposta: " + callbackResponse);
+        String jwtResponse = Jwts.builder()
+                .setClaims(callbackResponse.getCallbackResponseAsClaims())
+                .signWith(privateKey)
+                .compact();
+        return jwtResponse;
     }
 
     private boolean validateJwt(String encryptedBody) {
         readSigningKeys();
-        try{
+        try {
             logger.info("Validando requisição com chave pública");
             Jwts.parserBuilder()
                     .setSigningKey(cosignerPubKey)
                     .build()
                     .parse(encryptedBody);
             return true;
-        } catch (Exception e){
+        } catch (Exception e) {
             logger.error("ERRO AO VALIDAR JWT: " + e.getStackTrace());
         }
         return false;
     }
-    private void readSigningKeys(){
+
+    private void readSigningKeys() {
         logger.info("Lendo chave privada e chave pública");
-        try{
+        try {
             //privateKey = new String(Files.readAllBytes(Paths.get(privateKeyPath)));
             //cosignerPubKey = new String(Files.readAllBytes(Paths.get(cosignerPublicKeyPath)));
             SignatureAlgorithm sa = SignatureAlgorithm.HS256;
             cosignerPubKey = new SecretKeySpec(cosignerPublicKeyPath.getBytes(), sa.getJcaName());
             privateKey = new SecretKeySpec(privateKeyPath.getBytes(), sa.getJcaName());
 
-            if (cosignerPublicKeyPath.isBlank() || privateKeyPath.isEmpty()){throw new IOException();} // TESTE
-        } catch (IOException e){
+            if (cosignerPublicKeyPath.isBlank() || privateKeyPath.isEmpty()) {
+                throw new IOException();
+            } // TESTE
+        } catch (IOException e) {
             logger.error("ERRO AO ABRIR CHAVES: " + e.getStackTrace());
         }
     }
