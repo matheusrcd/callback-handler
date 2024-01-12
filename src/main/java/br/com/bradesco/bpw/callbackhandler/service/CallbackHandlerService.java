@@ -6,6 +6,12 @@ import br.com.bradesco.bpw.callbackhandler.dto.PayloadTransaction;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.*;
+import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
+import org.bouncycastle.asn1.pkcs.RSAPrivateKey;
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.bouncycastle.openssl.PEMKeyPair;
+import org.bouncycastle.openssl.PEMParser;
+import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,13 +20,14 @@ import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
+import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.PrivateKey;
-import java.security.PublicKey;
+import java.security.*;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 import java.util.Date;
 
@@ -33,8 +40,8 @@ public class CallbackHandlerService {
 
     @Value("${cosignerPublicKeyPath}")
     private String cosignerPublicKeyPath;
-    private SecretKeySpec privateKey;
-    private SecretKeySpec cosignerPubKey;
+    private PrivateKey privateKey;
+    private PublicKey cosignerPubKey;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -106,17 +113,32 @@ public class CallbackHandlerService {
     private void readSigningKeys() {
         logger.info("Lendo chave privada e chave pública");
         try {
-            //privateKey = new String(Files.readAllBytes(Paths.get(privateKeyPath)));
-            //cosignerPubKey = new String(Files.readAllBytes(Paths.get(cosignerPublicKeyPath)));
-            SignatureAlgorithm sa = SignatureAlgorithm.HS256;
-            cosignerPubKey = new SecretKeySpec(cosignerPublicKeyPath.getBytes(), sa.getJcaName());
-            privateKey = new SecretKeySpec(privateKeyPath.getBytes(), sa.getJcaName());
+            this.privateKey = extractPrivateKey(privateKeyPath);
+            this.cosignerPubKey = extractPublicKey(cosignerPublicKeyPath);
 
             if (cosignerPublicKeyPath.isBlank() || privateKeyPath.isEmpty()) {
                 throw new IOException();
-            } // TESTE
+            }
         } catch (IOException e) {
+            logger.error("ERRO AO ABRIR ARQUIVOS DE CHAVES: " + e.getStackTrace());
+        } catch (Exception e) {
             logger.error("ERRO AO ABRIR CHAVES: " + e.getStackTrace());
+        }
+    }
+
+    private static PrivateKey extractPrivateKey(String filePath) throws Exception {
+        try (PEMParser pemParser = new PEMParser(new FileReader(filePath))) {
+            JcaPEMKeyConverter converter = new JcaPEMKeyConverter();
+            PEMKeyPair keyPair = (PEMKeyPair) pemParser.readObject();
+            return converter.getPrivateKey(keyPair.getPrivateKeyInfo());
+        }
+    }
+
+    private static PublicKey extractPublicKey(String filePath) throws Exception {
+        try (PEMParser pemParser = new PEMParser(new FileReader(filePath))) {
+            JcaPEMKeyConverter converter = new JcaPEMKeyConverter();
+            SubjectPublicKeyInfo publicKeyInfo = (SubjectPublicKeyInfo) pemParser.readObject();
+            return converter.getPublicKey(publicKeyInfo);
         }
     }
 
