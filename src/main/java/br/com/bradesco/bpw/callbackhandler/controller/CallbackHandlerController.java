@@ -1,20 +1,19 @@
 package br.com.bradesco.bpw.callbackhandler.controller;
 
-import br.com.bradesco.bpw.callbackhandler.dto.CallbackResponse;
 import br.com.bradesco.bpw.callbackhandler.dto.PayloadTransaction;
 import br.com.bradesco.bpw.callbackhandler.service.CallbackHandlerService;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.jsonwebtoken.Jwts;
-import jakarta.validation.Valid;
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
+import java.util.List;
 
 @RestController
 @RequestMapping(value = "/v2")
@@ -28,7 +27,7 @@ public class CallbackHandlerController {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @PostMapping(value = "/tx_sign_request", consumes = MediaType.TEXT_PLAIN_VALUE)
+    @PostMapping(value = "/tx_sign_request", produces = "application/jwt", consumes = "application/jwt")
     @ResponseBody
     public ResponseEntity<String> transactionSigning(@RequestBody String encryptedBody) {
         PayloadTransaction payloadTransaction = callbackHandlerService.processTxRequest(encryptedBody);
@@ -39,7 +38,7 @@ public class CallbackHandlerController {
         return ResponseEntity.badRequest().body("");
     }
 
-    @PostMapping(value = "/config_change_sign_request", consumes = "application/jwt")
+    @PostMapping(value = "/config_change_sign_request")
     @ResponseBody
     public ResponseEntity<String> configurationApprovalCallback(@RequestBody String encryptedBody) {
         PayloadTransaction payloadTransaction = callbackHandlerService.processTxRequest(encryptedBody);
@@ -55,4 +54,5 @@ public class CallbackHandlerController {
     public ResponseEntity<String> getTx() {
         return ResponseEntity.ok("Sucesso");
     }
+
 }
