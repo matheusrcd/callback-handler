@@ -39,7 +39,7 @@ public class CallbackHandlerController {
         return ResponseEntity.badRequest().body("");
     }
 
-    @PostMapping(value = "/config_change_sign_request", consumes = MediaType.TEXT_PLAIN_VALUE)
+    @PostMapping(value = "/config_change_sign_request", consumes = "application/jwt")
     @ResponseBody
     public ResponseEntity<String> configurationApprovalCallback(@RequestBody String encryptedBody) {
         PayloadTransaction payloadTransaction = callbackHandlerService.processTxRequest(encryptedBody);
